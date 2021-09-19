@@ -24,3 +24,8 @@ class db_connect():
         except:
             return False
         # return bool(self.cursor.())
+
+    def get_contact_list(self, email, password):
+        self.__cursor.execute("select contacts.id, fio, phone, contacts.date_of_birth from contacts join users on contacts.user_id=users.id where users.email='{email}' and users.password='{password}'".format(email=email,password=password))
+        return self.__cursor.fetchall()
+        

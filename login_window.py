@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, uic
 from register_window import register_window
+from main_window import main_window
 from db_connect import db_connect
 
 class login_window(QtGui.QMainWindow):
@@ -23,7 +24,10 @@ class login_window(QtGui.QMainWindow):
         else:
             #login succesful
             #open main window
-            print("login succesful")
+            print("login succesful")#TODO remove
+            self.main_window = main_window(self.login_field.text(), self.pass_field.text())
+            self.main_window.show()
+            self.close()
             pass
     
     def on_sing_up_click(self):
