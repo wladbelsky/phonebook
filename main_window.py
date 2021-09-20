@@ -3,6 +3,7 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtCore import QAbstractTableModel
 from PyQt4.QtGui import QTableView
 from db_connect import db_connect
+from add_contact import add_contact
 import datetime
 
 class main_window(QtGui.QMainWindow):
@@ -14,21 +15,44 @@ class main_window(QtGui.QMainWindow):
         self.__user_password = user_password
         self.update_phonebook_table()
         self.__data_model = TableModel(self.contact_list)
-        # self.phone_book_table.setColumnCount(3)
-        # self.phone_book_table.setHorizontalHeaderLabels(["Name", "Phone", "Date of birth"])
-        # self.__update_phonebook_table()
         self.phone_book_table.setModel(self.__data_model)
+        self.actionAdd.triggered.connect(self.add_contact)
+        self.actionEdit_selected.triggered.connect(self.edit_contact)
+        self.actionDelete.triggered.connect(self.remove_contact)
+        self.actionRefresh.triggered.connect(self.refresh_list)
 
     def update_phonebook_table(self):
-        self.contact_list = self.__db.get_contact_list(self.__user_email,self.__user_password)
+        #self.contact_list = self.__db.get_contact_list(self.__user_email,self.__user_password)
+        self.contact_list = db_connect().get_contact_list(self.__user_email,self.__user_password)
         #self.phone_book_table.setRowCount(len(self.contact_list))
-
         # row_number = 0
         # for contact in self.contact_list:
         #     self.phone_book_table.setItem(row_number,0,QTableWidgetItem(contact[1]))
         #     self.phone_book_table.setItem(row_number,1,QTableWidgetItem(contact[2]))
         #     self.phone_book_table.setItem(row_number,2,QTableWidgetItem(contact[3].strftime("%d/%m/%Y")))
         #     row_number += 1
+    def add_contact(self):
+        self.add_dialog = add_contact()
+        self.add_dialog.show()
+        self.add_dialog.closeEvent = self.refresh_list
+
+    def edit_contact(self):
+        indexes = self.phone_book_table.selectionModel().selectedRows()
+        if len(indexes):
+            self.edit_dialog = add_contact(self.contact_list[indexes[0].row()])
+            self.edit_dialog.show()
+            self.edit_dialog.closeEvent = self.refresh_list
+        else:
+            print("nothing selected")
+
+    def remove_contact(self):
+        print("remove")
+
+    def refresh_list(self,_=None):
+        self.update_phonebook_table()
+        self.__data_model.setData(self.contact_list)
+        print("list updated")
+
 
 class TableModel(QAbstractTableModel):
     def __init__(self, data):
@@ -59,3 +83,6 @@ class TableModel(QAbstractTableModel):
 
     def columnCount(self, index):
         return len(self.__data[0])-1
+
+    def setData(self,data):
+        self.__data = data
