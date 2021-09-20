@@ -23,12 +23,19 @@ class db_connect():
                                   "values ('{email}','{password}','{dob}')".format(email=email,password=password,dob=date_of_birth))
             self.__mydb.commit()
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     def get_contact_list(self, email, password):
         self.__cursor.execute("select contacts.id, fio, phone, contacts.date_of_birth "
                               "from contacts join users on contacts.user_id=users.id where users.email='{email}' and users.password='{password}'".format(email=email,password=password))
+        return self.__cursor.fetchall()
+
+    def get_birthdays_for_week(self, email, password):
+        self.__cursor.execute("select id,fio,phone,date_of_birth from contacts where user_id=(select id from users where email={email} and password={password}) "
+                              "and DayOfYear(date_of_birth) between DayOfYear(Now())"
+                              " and DayOfYear(Now())+7".format(email=email,password=password))
         return self.__cursor.fetchall()
 
     def add_contact(self, email, password, contact_data):
@@ -47,7 +54,29 @@ class db_connect():
             return False
         
     def edit_contact(self, email, password, contact_data):
-        pass
+        contact_id = contact_data[0]
+        fio = contact_data[1]
+        phone = contact_data[2]
+        date_of_birth = contact_data[3]
+        try:
+            self.__cursor.execute("update contacts set user_id = (select users.id from users where "
+                                  "users.email='{email}' and users.password='{password}'), fio='{fio}',"
+                                  "phone='{phone}', date_of_birth='{doa}' where contacts.id='{id}'".format(email=email,password=password,fio=fio,
+                                  phone=phone,doa=date_of_birth.toString("yyyy-M-d"), id=contact_id))
+            self.__mydb.commit()
+            return True             
+        except Exception as e:
+            print(e)
+            return False
 
     def delete_contact(self, email, password, contact_id):
-        pass
+        try:
+            self.__cursor.execute("delete from contacts where id='{id}' "
+                                  "and (select count(id) from users where "
+                                  "email={email} and password={password})>0".format(id=contact_id, email=email, password=password))
+            self.__mydb.commit()
+            return True             
+        except Exception as e:
+            print(e)
+            return False
+    

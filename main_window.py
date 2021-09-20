@@ -10,7 +10,7 @@ class main_window(QtGui.QMainWindow):
     def __init__(self, user_email, user_password):
         super(main_window, self).__init__()
         uic.loadUi('ui/main.ui', self)
-        self.__db = db_connect()
+        #self.__db = db_connect()
         self.__user_email = user_email
         self.__user_password = user_password
         self.update_phonebook_table()
@@ -20,17 +20,29 @@ class main_window(QtGui.QMainWindow):
         self.actionEdit_selected.triggered.connect(self.edit_contact)
         self.actionDelete.triggered.connect(self.remove_contact)
         self.actionRefresh.triggered.connect(self.refresh_list)
+        self.birthday_notify()
 
     def update_phonebook_table(self):
-        #self.contact_list = self.__db.get_contact_list(self.__user_email,self.__user_password)
         self.contact_list = db_connect().get_contact_list(self.__user_email,self.__user_password)
-        #self.phone_book_table.setRowCount(len(self.contact_list))
-        # row_number = 0
-        # for contact in self.contact_list:
-        #     self.phone_book_table.setItem(row_number,0,QTableWidgetItem(contact[1]))
-        #     self.phone_book_table.setItem(row_number,1,QTableWidgetItem(contact[2]))
-        #     self.phone_book_table.setItem(row_number,2,QTableWidgetItem(contact[3].strftime("%d/%m/%Y")))
-        #     row_number += 1
+
+    def birthday_notify(self):
+        self.alert = QtGui.QMessageBox()
+        self.alert.setWindowTitle("Birthdays notification")
+        notification_text = "Here is list of upcoming birthdays for 7 days:\n"
+        db = db_connect()
+        birthday_list = db.get_birthdays_for_week(self.__user_email, self.__user_password)
+        for contact in birthday_list:
+            contact_text = "{fio},\t{phone},\t{dob}\n".format(fio=contact[1],phone=contact[2],dob=contact[3].strftime("%d-%m-%Y"))
+            notification_text = notification_text + contact_text
+        self.alert.setText(notification_text)
+        self.alert.show()
+
+    def show_nothing_selected_message_box(self):
+        self.alert = QtGui.QMessageBox()
+        self.alert.setWindowTitle("Nothing selected")
+        self.alert.setText("Please select item to operate with.")
+        self.alert.show()
+
     def add_contact(self):
         self.add_dialog = add_contact(self.__user_email, self.__user_password)
         self.add_dialog.show()
@@ -43,10 +55,17 @@ class main_window(QtGui.QMainWindow):
             self.edit_dialog.show()
             self.edit_dialog.closeEvent = self.refresh_list
         else:
-            print("nothing selected")
+            self.show_nothing_selected_message_box()
 
     def remove_contact(self):
-        print("remove")
+        indexes = self.phone_book_table.selectionModel().selectedRows()
+        if len(indexes):
+            db = db_connect()
+            db.delete_contact(self.__user_email, self.__user_password, self.contact_list[indexes[0].row()][0])
+            self.refresh_list()
+        else:
+            self.show_nothing_selected_message_box()
+
 
     def refresh_list(self,_=None):
         self.update_phonebook_table()

@@ -23,6 +23,9 @@
       <height>24</height>
      </rect>
     </property>
+    <property name="inputMask">
+     <string>0 (000) 000-00-00; </string>
+    </property>
     <property name="echoMode">
      <enum>QLineEdit::Normal</enum>
     </property>
