@@ -32,14 +32,14 @@ class main_window(QtGui.QMainWindow):
         #     self.phone_book_table.setItem(row_number,2,QTableWidgetItem(contact[3].strftime("%d/%m/%Y")))
         #     row_number += 1
     def add_contact(self):
-        self.add_dialog = add_contact()
+        self.add_dialog = add_contact(self.__user_email, self.__user_password)
         self.add_dialog.show()
         self.add_dialog.closeEvent = self.refresh_list
 
     def edit_contact(self):
         indexes = self.phone_book_table.selectionModel().selectedRows()
         if len(indexes):
-            self.edit_dialog = add_contact(self.contact_list[indexes[0].row()])
+            self.edit_dialog = add_contact(self.__user_email, self.__user_password, self.contact_list[indexes[0].row()])
             self.edit_dialog.show()
             self.edit_dialog.closeEvent = self.refresh_list
         else:
@@ -57,11 +57,6 @@ class main_window(QtGui.QMainWindow):
 class TableModel(QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
-        # self.__data = []
-        # self.__indexes = []
-        # for record in data:
-        #     self.__data.append(record[1:])
-        #     self.__indexes.append(record[:1])
         self.__data = data
         self.headers = ["Name", "Phone", "Date of birth"]
 
@@ -85,4 +80,7 @@ class TableModel(QAbstractTableModel):
         return len(self.__data[0])-1
 
     def setData(self,data):
+        self.beginResetModel()
         self.__data = data
+        self.endResetModel()
+

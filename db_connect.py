@@ -25,7 +25,6 @@ class db_connect():
             return True
         except:
             return False
-        # return bool(self.cursor.())
 
     def get_contact_list(self, email, password):
         self.__cursor.execute("select contacts.id, fio, phone, contacts.date_of_birth "
@@ -33,9 +32,21 @@ class db_connect():
         return self.__cursor.fetchall()
 
     def add_contact(self, email, password, contact_data):
-        pass
+        fio = contact_data[1]
+        phone = contact_data[2]
+        date_of_birth = contact_data[3]
+        try:
+            self.__cursor.execute("insert into contacts (user_id,fio,phone,date_of_birth) values "
+                                  "((select id from users where users.email={email} and users.password={password}), "
+                                  "'{fio}','{phone}',date('{date_of_birth}'))".format(email=email,password=password,
+                                  fio=fio,phone=phone, date_of_birth=date_of_birth.toString("yyyy-M-d")))
+            self.__mydb.commit()
+            return True             
+        except Exception as e:
+            print(e)
+            return False
         
-    def edit_contact(self, email, password, contact_id, contact_data):
+    def edit_contact(self, email, password, contact_data):
         pass
 
     def delete_contact(self, email, password, contact_id):
