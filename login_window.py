@@ -1,4 +1,5 @@
 from PyQt4 import QtGui, uic
+from password_reset_window import password_reset_window
 from register_window import register_window
 from main_window import main_window
 from db_connect import db_connect
@@ -33,7 +34,8 @@ class login_window(QtGui.QMainWindow):
         
 
     def on_password_forgot_click(self,_):
-        print("forgot")
+        self.reset_dialog = password_reset_window()
+        self.reset_dialog.show()
 
     def on_password_checkbox_click(self):
         if self.show_password_checkbox.isChecked():
