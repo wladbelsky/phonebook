@@ -4,7 +4,7 @@ import os.path as path
 from PyQt4.QtGui import QMessageBox
 
 class db_connect():
-    def __init__(self):#TODO: load from file
+    def __init__(self):
         path_to_json = "config/db_config.json"
         if not path.isfile(path_to_json):
             raise FileNotFoundError("'db_config.json' not found!")
@@ -24,7 +24,6 @@ class db_connect():
                 self.alert.setWindowTitle("Can't connect to database")
                 self.alert.setText("Can't connect to database\nCheck your internet connection and configuration file")
                 self.alert.show()
-
 
     def user_login(self, email, password):
         self.__cursor.execute("SELECT * FROM users WHERE email='{email}' "

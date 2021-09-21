@@ -13,7 +13,6 @@ class login_window(QtGui.QMainWindow):
         self.sign_up_button.clicked.connect(self.on_sing_up_click)
         self.forgot_password.mousePressEvent = self.on_password_forgot_click
         self.show_password_checkbox.toggled.connect(self.on_password_checkbox_click)
-        #self.show()
     
     def on_sign_in_click(self):
         db = db_connect()
@@ -26,7 +25,6 @@ class login_window(QtGui.QMainWindow):
             self.main_window = main_window(self.login_field.text(), self.pass_field.text())
             self.main_window.show()
             self.close()
-            pass
     
     def on_sing_up_click(self):
         self.register = register_window()
