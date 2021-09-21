@@ -1,14 +1,29 @@
 import mysql.connector
+from json import load, loads
+import os.path as path
+from PyQt4.QtGui import QMessageBox
 
 class db_connect():
     def __init__(self):#TODO: load from file
-        self.__mydb = mysql.connector.connect(
-            host="localhost",
-            user="api",
-            password="mariadb",
-            database="phonebook",
-        )
-        self.__cursor = self.__mydb.cursor()
+        path_to_json = "config/db_config.json"
+        if not path.isfile(path_to_json):
+            raise FileNotFoundError("'db_config.json' not found!")
+        with open(path_to_json,"rb") as json_config_file:
+            data = load(json_config_file)
+            try:
+                self.__mydb = mysql.connector.connect(
+                    host=data["host"],
+                    user=data["user"],
+                    password=data["password"],
+                    database=data["database"],
+                )
+                self.__cursor = self.__mydb.cursor()
+            except Exception as e:
+                print(e)
+                self.alert = QMessageBox()
+                self.alert.setWindowTitle("Can't connect to database")
+                self.alert.setText("Can't connect to database\nCheck your internet connection and configuration file")
+                self.alert.show()
 
 
     def user_login(self, email, password):

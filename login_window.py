@@ -22,9 +22,6 @@ class login_window(QtGui.QMainWindow):
             self.alert.setText("Login or Password invalid. Please try again.")
             self.alert.show()
         else:
-            #login succesful
-            #open main window
-            print("login succesful")#TODO remove
             self.main_window = main_window(self.login_field.text(), self.pass_field.text())
             self.main_window.show()
             self.close()

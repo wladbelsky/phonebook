@@ -14,16 +14,22 @@ class main_window(QtGui.QMainWindow):
         self.__user_email = user_email
         self.__user_password = user_password
         self.update_phonebook_table()
+        self.refresh_alphabet_director()
         self.__data_model = TableModel(self.contact_list)
         self.phone_book_table.setModel(self.__data_model)
         self.actionAdd.triggered.connect(self.add_contact)
         self.actionEdit_selected.triggered.connect(self.edit_contact)
         self.actionDelete.triggered.connect(self.remove_contact)
         self.actionRefresh.triggered.connect(self.refresh_list)
+        self.alphabet_director.itemClicked.connect(self.on_alphabet_director_item_selected)
         self.birthday_notify()
 
-    def update_phonebook_table(self):
-        self.contact_list = db_connect().get_contact_list(self.__user_email,self.__user_password)
+    def on_alphabet_director_item_selected(self, item):
+        for index, contact in enumerate(self.contact_list):
+            if contact[1][0].upper() == item.text():
+                self.phone_book_table.selectRow(index)
+                break
+
 
     def birthday_notify(self):
         self.alert = QtGui.QMessageBox()
@@ -66,11 +72,22 @@ class main_window(QtGui.QMainWindow):
         else:
             self.show_nothing_selected_message_box()
 
+    def update_phonebook_table(self):
+        self.contact_list = db_connect().get_contact_list(self.__user_email,self.__user_password)
 
     def refresh_list(self,_=None):
         self.update_phonebook_table()
         self.__data_model.setData(self.contact_list)
+        self.refresh_alphabet_director()
         print("list updated")
+    
+    def refresh_alphabet_director(self):
+        letters = []
+        for contact in self.contact_list:
+            if contact[1][0].upper() not in letters:
+                letters.append(contact[1][0].upper())
+        self.alphabet_director.clear()
+        self.alphabet_director.addItems(letters)
 
 
 class TableModel(QAbstractTableModel):
